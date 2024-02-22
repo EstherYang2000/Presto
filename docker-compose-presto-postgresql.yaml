@@ -1,0 +1,135 @@
+---
+version: '2'
+services:
+  coordinator:
+    image: prestodb/presto:latest
+    container_name: presto
+    volumes:
+      - ./data/presto_data:/var/presto/data
+      - ./coordinator/config.properties:/opt/presto-server/etc/config.properties
+      - ./coordinator/log.properties:/opt/presto-server/etc/log.properties
+      - ./coordinator/jvm.config:/opt/presto-server/etc/jvm.config
+      - ./jmx/jmx_config.yaml:/opt/presto-server/etc/jmx_config.yaml
+      - ./jmx/jmx_prometheus_javaagent-0.20.0.jar:/opt/presto-server/lib/jmx_prometheus_javaagent-0.20.0.jar
+      - ./coordinator/node.properties:/opt/presto-server/etc/node.properties
+      - ./coordinator/postgresql.properties:/opt/presto-server/etc/catalog/postgresql.properties
+      - ./coordinator/elasticsearch.properties:/opt/presto-server/etc/catalog/elasticsearch.properties
+      - ./etc/catalog/developer-yyj-737cd34829e1.json:/opt/presto-server/etc/catalog/developer-yyj-737cd34829e1.json
+      - ./coordinator/bigquery.properties:/opt/presto-server/etc/catalog/bigquery.properties
+    # depends_on:
+    #   - postgresql
+    ports:
+      - "8080:8080"
+      - "9483"
+    networks:
+      - presto-nw
+    # extra_hosts:
+    #   - "host.docker.internal:host-gateway"
+    # network_mode: host
+  worker1:
+    image: prestodb/presto:latest
+    container_name: worker1
+    volumes:
+      - ./worker1/config.properties:/opt/presto-server/etc/config.properties
+      - ./worker1/jvm.config:/opt/presto-server/etc/jvm.config
+      - ./worker1/node.properties:/opt/presto-server/etc/node.properties
+    depends_on:
+      - coordinator
+    ports:
+      - "8081:8081"
+    networks:
+      - presto-nw
+  worker2:
+    image: prestodb/presto:latest
+    container_name: worker2
+    volumes:
+      - ./worker2/config.properties:/opt/presto-server/etc/config.properties
+      - ./worker2/jvm.config:/opt/presto-server/etc/jvm.config
+      - ./worker2/node.properties:/opt/presto-server/etc/node.properties
+    depends_on:
+      - coordinator
+    ports:
+      - "8082:8082"
+    networks:
+      - presto-nw
+  # postgresql:
+  #   image: postgres:latest
+  #   container_name: presto-postgresql
+  #   environment:
+  #     POSTGRES_USER: 'presto'
+  #     POSTGRES_PASSWORD: 'presto'
+  #     POSTGRES_DB : 'postgres'
+  #   ports:
+  #     - "5434:5432"
+  #   networks:
+  #     - presto-nw
+  elasticsearch:
+    container_name: presto-elasticsearch
+    image: docker.elastic.co/elasticsearch/elasticsearch:7.17.0
+    environment:
+      - cluster.name=nids-cluster
+      - bootstrap.memory_lock=true
+      - discovery.type=single-node
+      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
+      - ELASTIC_USERNAME=elastic
+      - ELASTIC_PASSWORD=elastic
+    ports:
+      - 9200:9200
+    volumes:
+      - es_data:/usr/share/elasticsearch/data:rw
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+      nofile:
+        soft: 65536
+        hard: 65536
+    deploy:    
+      resources:
+        limits:
+          cpus: '2.0'
+        reservations:
+          cpus: '1.0'
+    networks:
+      - presto-nw
+
+  kibana:
+    container_name: presto-kibana
+    image: docker.elastic.co/kibana/kibana:7.17.0
+    environment:
+      - "ELASTICSEARCH_HOSTS=http://presto-elasticsearch:9200"
+      - "ELASTICSEARCH_USERNAME=kibana_system"
+      - "ELASTICSEARCH_PASSWORD=elastic"
+    ports:
+      - 5601:5601
+    networks:
+      - presto-nw
+    depends_on:
+      - elasticsearch
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: prometheus
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+    networks:
+      - presto-nw
+  grafana:
+    image: grafana/grafana:latest
+    container_name: grafana
+    ports:
+      - "3000:3000"
+    networks:
+      - presto-nw
+    environment:
+    - GF_SECURITY_ADMIN_USER=esther
+    - GF_SECURITY_ADMIN_PASSWORD=esther
+volumes:
+  es_data:
+    driver: local
+networks:
+  presto-nw:
+    driver: bridge

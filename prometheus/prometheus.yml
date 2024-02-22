@@ -1,0 +1,5 @@
+scrape_configs:
+  - job_name: 'presto'
+    static_configs:
+      - targets: ['coordinator:8080']  # Replace with your Presto Coordinator IP address
+    metrics_path: /metrics

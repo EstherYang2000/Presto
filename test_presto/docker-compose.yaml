@@ -1,0 +1,37 @@
+services:
+  coordinator:
+    image: prestodb/presto:latest
+    container_name: presto_285
+    volumes:
+      - ./coordinator/config.properties:/opt/presto-server/etc/config.properties
+      - ./coordinator/jvm.config:/opt/presto-server/etc/jvm.config
+      - ./coordinator/node.properties:/opt/presto-server/etc/node.properties
+      - ./coordinator/postgresql.properties:/opt/presto-server/etc/catalog/postgresql.properties
+      - ./coordinator/elasticsearch.properties:/opt/presto-server/etc/catalog/elasticsearch.properties
+      # - ./etc/catalog/developer-yyj-737cd34829e1.json:/opt/presto-server/etc/catalog/developer-yyj-737cd34829e1.json
+      # - ./coordinator/bigquery.properties:/opt/presto-server/etc/catalog/bigquery.properties
+    # depends_on:
+    #   - postgresql
+    ports:
+      - "8086:8086"
+    networks:
+      - presto-nw
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    # network_mode: host
+  worker1:
+    image: prestodb/presto:latest
+    container_name: test_worker1
+    volumes:
+      - ./worker1/config.properties:/opt/presto-server/etc/config.properties
+      - ./worker1/jvm.config:/opt/presto-server/etc/jvm.config
+      - ./worker1/node.properties:/opt/presto-server/etc/node.properties
+    depends_on:
+      - coordinator
+    ports:
+      - "8087:8087"
+    networks:
+      - presto-nw
+networks:
+  presto-nw:
+    driver: bridge
