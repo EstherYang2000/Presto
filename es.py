@@ -100,7 +100,7 @@ def import_csv_to_elasticsearch(es,csv_file, index_name):
     # Assign random ids to the DataFrame
     df['id'] = random_ids
     data = df.to_dict(orient='records')
-    print(df.info())
+    # print(df.info())
     # print(data)
     # Index documents into Elasticsearch
     for doc in data:
