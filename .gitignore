@@ -1,2 +1,5 @@
 *.json
 *.csv
+*.pdf
+json/
+__pycache__/es.cpython-311.pyc

@@ -8,11 +8,11 @@ services:
       - presto_data:/var/presto/data
       - ./coordinator/config.properties:/opt/presto-server/etc/config.properties
       - ./coordinator/log.properties:/opt/presto-server/etc/log.properties
+      - ./coordinator/node.properties:/opt/presto-server/etc/node.properties
       - ./coordinator/jmx.properties:/opt/presto-server/etc/catalog/jmx.properties
       - ./coordinator/jvm.config:/opt/presto-server/etc/jvm.config
       - ./jmx/config.yaml:/opt/presto-server/etc/config.yaml
       - ./jmx/jmx_prometheus_javaagent-0.20.0.jar:/opt/presto-server/etc/jmx_prometheus_javaagent-0.20.0.jar
-      - ./coordinator/node.properties:/opt/presto-server/etc/node.properties
       - ./coordinator/postgresql.properties:/opt/presto-server/etc/catalog/postgresql.properties
       - ./coordinator/elasticsearch.properties:/opt/presto-server/etc/catalog/elasticsearch.properties
       - ./etc/catalog/developer-yyj-737cd34829e1.json:/opt/presto-server/etc/catalog/developer-yyj-737cd34829e1.json
@@ -67,75 +67,75 @@ services:
   #     - "5434:5432"
   #   networks:
   #     - presto-nw
-  elasticsearch:
-    container_name: presto-elasticsearch
-    image: docker.elastic.co/elasticsearch/elasticsearch:7.17.0
-    environment:
-      - cluster.name=nids-cluster
-      - bootstrap.memory_lock=true
-      - discovery.type=single-node
-      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
-      - ELASTIC_USERNAME=elastic
-      - ELASTIC_PASSWORD=elastic
-    ports:
-      - 9200:9200
-    volumes:
-      - es_data:/usr/share/elasticsearch/data:rw
-    ulimits:
-      memlock:
-        soft: -1
-        hard: -1
-      nofile:
-        soft: 65536
-        hard: 65536
-    deploy:    
-      resources:
-        limits:
-          cpus: '2.0'
-        reservations:
-          cpus: '1.0'
-    networks:
-      - presto-nw
+  # elasticsearch:
+  #   container_name: presto-elasticsearch
+  #   image: docker.elastic.co/elasticsearch/elasticsearch:7.17.0
+  #   environment:
+  #     - cluster.name=nids-cluster
+  #     - bootstrap.memory_lock=true
+  #     - discovery.type=single-node
+  #     - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
+  #     - ELASTIC_USERNAME=elastic
+  #     - ELASTIC_PASSWORD=elastic
+  #   ports:
+  #     - 9200:9200
+  #   volumes:
+  #     - es_data:/usr/share/elasticsearch/data:rw
+  #   ulimits:
+  #     memlock:
+  #       soft: -1
+  #       hard: -1
+  #     nofile:
+  #       soft: 65536
+  #       hard: 65536
+  #   deploy:    
+  #     resources:
+  #       limits:
+  #         cpus: '2.0'
+  #       reservations:
+  #         cpus: '1.0'
+  #   networks:
+  #     - presto-nw
 
-  kibana:
-    container_name: presto-kibana
-    image: docker.elastic.co/kibana/kibana:7.17.0
-    environment:
-      - "ELASTICSEARCH_HOSTS=http://presto-elasticsearch:9200"
-      - "ELASTICSEARCH_USERNAME=kibana_system"
-      - "ELASTICSEARCH_PASSWORD=elastic"
-    ports:
-      - 5601:5601
-    networks:
-      - presto-nw
-    depends_on:
-      - elasticsearch
-  prometheus:
-    image: prom/prometheus:latest
-    container_name: prometheus
-    environment:
-      - TZ="Asia/Taipei"
-    ports:
-      - "9090:9090"
-    volumes:
-      - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
-    command:
-      - '--config.file=/etc/prometheus/prometheus.yml'
-    networks:
-      - presto-nw
-  grafana:
-    image: grafana/grafana:latest
-    container_name: grafana
-    ports:
-      - "3000:3000"
-    networks:
-      - presto-nw
-    environment:
-    - GF_SECURITY_ADMIN_USER=esther
-    - GF_SECURITY_ADMIN_PASSWORD=esther
+  # kibana:
+  #   container_name: presto-kibana
+  #   image: docker.elastic.co/kibana/kibana:7.17.0
+  #   environment:
+  #     - "ELASTICSEARCH_HOSTS=http://presto-elasticsearch:9200"
+  #     - "ELASTICSEARCH_USERNAME=kibana_system"
+  #     - "ELASTICSEARCH_PASSWORD=elastic"
+  #   ports:
+  #     - 5601:5601
+  #   networks:
+  #     - presto-nw
+  #   depends_on:
+  #     - elasticsearch
+  # prometheus:
+  #   image: prom/prometheus:latest
+  #   container_name: prometheus
+  #   environment:
+  #     - TZ="Asia/Taipei"
+  #   ports:
+  #     - "9090:9090"
+  #   volumes:
+  #     - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
+  #   command:
+  #     - '--config.file=/etc/prometheus/prometheus.yml'
+  #   networks:
+  #     - presto-nw
+  # grafana:
+  #   image: grafana/grafana:latest
+  #   container_name: grafana
+  #   ports:
+  #     - "3000:3000"
+  #   networks:
+  #     - presto-nw
+  #   environment:
+  #   - GF_SECURITY_ADMIN_USER=esther
+  #   - GF_SECURITY_ADMIN_PASSWORD=esther
 volumes:
-  es_data:
-    driver: local
+  # es_data:
+  #   driver: local
   presto_data:
     driver: local
 networks:
