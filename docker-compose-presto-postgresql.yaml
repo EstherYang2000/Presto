@@ -5,7 +5,6 @@ services:
     image: prestodb/presto:latest
     container_name: presto
     volumes:
-      - presto_data:/var/presto/data
       - ./coordinator/config.properties:/opt/presto-server/etc/config.properties
       - ./coordinator/log.properties:/opt/presto-server/etc/log.properties
       - ./coordinator/node.properties:/opt/presto-server/etc/node.properties
@@ -22,6 +21,7 @@ services:
     ports:
       - "8080:8080"
       - "9487:9487"
+    mem_limit: 4g
     networks:
       - presto-nw
     # extra_hosts:
@@ -40,6 +40,7 @@ services:
       - coordinator
     ports:
       - "8081:8081"
+    mem_limit: 4g
     networks:
       - presto-nw
   worker2:
@@ -50,10 +51,12 @@ services:
       - ./worker2/jvm.config:/opt/presto-server/etc/jvm.config
       - ./worker2/node.properties:/opt/presto-server/etc/node.properties
       - ./worker2/postgresql.properties:/opt/presto-server/etc/catalog/postgresql.properties
+      - ./worker2/elasticsearch.properties:/opt/presto-server/etc/catalog/elasticsearch.properties
     depends_on:
       - coordinator
     ports:
       - "8082:8082"
+    mem_limit: 4g
     networks:
       - presto-nw
   # postgresql:
@@ -110,29 +113,29 @@ services:
   #     - presto-nw
   #   depends_on:
   #     - elasticsearch
-  # prometheus:
-  #   image: prom/prometheus:latest
-  #   container_name: prometheus
-  #   environment:
-  #     - TZ="Asia/Taipei"
-  #   ports:
-  #     - "9090:9090"
-  #   volumes:
-  #     - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
-  #   command:
-  #     - '--config.file=/etc/prometheus/prometheus.yml'
-  #   networks:
-  #     - presto-nw
-  # grafana:
-  #   image: grafana/grafana:latest
-  #   container_name: grafana
-  #   ports:
-  #     - "3000:3000"
-  #   networks:
-  #     - presto-nw
-  #   environment:
-  #   - GF_SECURITY_ADMIN_USER=esther
-  #   - GF_SECURITY_ADMIN_PASSWORD=esther
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: prometheus
+    environment:
+      - TZ="Asia/Taipei"
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+    networks:
+      - presto-nw
+  grafana:
+    image: grafana/grafana:latest
+    container_name: grafana
+    ports:
+      - "3000:3000"
+    networks:
+      - presto-nw
+    environment:
+    - GF_SECURITY_ADMIN_USER=esther
+    - GF_SECURITY_ADMIN_PASSWORD=esther
 volumes:
   # es_data:
   #   driver: local
