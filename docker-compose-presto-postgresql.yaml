@@ -2,7 +2,7 @@
 version: '2'
 services:
   coordinator:
-    image: prestodb/presto:latest
+    image: prestodb/presto:0.286
     container_name: presto
     volumes:
       - ./coordinator/config.properties:/opt/presto-server/etc/config.properties
@@ -16,6 +16,8 @@ services:
       - ./coordinator/elasticsearch.properties:/opt/presto-server/etc/catalog/elasticsearch.properties
       - ./etc/catalog/developer-yyj-737cd34829e1.json:/opt/presto-server/etc/catalog/developer-yyj-737cd34829e1.json
       - ./coordinator/bigquery.properties:/opt/presto-server/etc/catalog/bigquery.properties
+      - presto_data:/opt/presto-server/data  # This line creates a volume for Presto data
+      - ./sql:/opt/presto-server/sql
     # depends_on:
     #   - postgresql
     ports:
@@ -28,7 +30,7 @@ services:
     #   - "host.docker.internal:host-gateway"
     # network_mode: host
   worker1:
-    image: prestodb/presto:latest
+    image: prestodb/presto:0.286
     container_name: worker1
     volumes:
       - ./worker1/config.properties:/opt/presto-server/etc/config.properties
@@ -44,7 +46,7 @@ services:
     networks:
       - presto-nw
   worker2:
-    image: prestodb/presto:latest
+    image: prestodb/presto:0.286
     container_name: worker2
     volumes:
       - ./worker2/config.properties:/opt/presto-server/etc/config.properties
@@ -131,12 +133,16 @@ services:
     container_name: grafana
     ports:
       - "3000:3000"
+    volumes:
+      - grafana_data:/var/lib/grafana
     networks:
       - presto-nw
     environment:
     - GF_SECURITY_ADMIN_USER=esther
     - GF_SECURITY_ADMIN_PASSWORD=esther
 volumes:
+  grafana_data:
+    driver: local    
   # es_data:
   #   driver: local
   presto_data:
