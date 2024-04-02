@@ -25,4 +25,5 @@ SELECT
     hermes.deleted_at
 FROM
     postgresql.data.latest_instagram_post as post 
-LEFT JOIN postgresql.data.ml_post_hermes AS hermes on post.platform_post_id = hermes.post_id;
+LEFT JOIN postgresql.data.ml_post_hermes AS hermes on post.platform_post_id = hermes.post_id
+And post.post_time = hermes.post_time;

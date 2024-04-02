@@ -18,12 +18,14 @@ services:
       - ./coordinator/bigquery.properties:/opt/presto-server/etc/catalog/bigquery.properties
       - presto_data:/opt/presto-server/data  # This line creates a volume for Presto data
       - ./sql:/opt/presto-server/sql
+      - ./coordinator/spill:/var/lib/presto/spill/
     # depends_on:
     #   - postgresql
     ports:
       - "8080:8080"
       - "9487:9487"
     mem_limit: 4g
+    memswap_limit: 2g
     networks:
       - presto-nw
     # extra_hosts:
@@ -37,12 +39,14 @@ services:
       - ./worker1/jvm.config:/opt/presto-server/etc/jvm.config
       - ./worker1/node.properties:/opt/presto-server/etc/node.properties
       - ./worker1/postgresql.properties:/opt/presto-server/etc/catalog/postgresql.properties
+      - ./worker1/spill:/var/lib/presto/spill/
 
     depends_on:
       - coordinator
     ports:
       - "8081:8081"
     mem_limit: 4g
+    memswap_limit: 2g
     networks:
       - presto-nw
   worker2:
@@ -54,11 +58,13 @@ services:
       - ./worker2/node.properties:/opt/presto-server/etc/node.properties
       - ./worker2/postgresql.properties:/opt/presto-server/etc/catalog/postgresql.properties
       - ./worker2/elasticsearch.properties:/opt/presto-server/etc/catalog/elasticsearch.properties
+      - ./worker2/spill:/var/lib/presto/spill/
     depends_on:
       - coordinator
     ports:
       - "8082:8082"
     mem_limit: 4g
+    memswap_limit: 2g
     networks:
       - presto-nw
   # postgresql:
