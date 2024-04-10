@@ -2,4 +2,6 @@
 *.csv
 *.pdf
 json/
+spill/
+etl_bigquery_template/
 __pycache__/es.cpython-311.pyc

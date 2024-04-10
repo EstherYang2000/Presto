@@ -15,6 +15,7 @@ services:
       - ./coordinator/postgresql.properties:/opt/presto-server/etc/catalog/postgresql.properties
       - ./coordinator/elasticsearch.properties:/opt/presto-server/etc/catalog/elasticsearch.properties
       - ./etc/catalog/developer-yyj-737cd34829e1.json:/opt/presto-server/etc/catalog/developer-yyj-737cd34829e1.json
+      - ./etc/catalog/ikala.json:/opt/presto-server/etc/catalog/ikala.json
       - ./coordinator/bigquery.properties:/opt/presto-server/etc/catalog/bigquery.properties
       - presto_data:/opt/presto-server/data  # This line creates a volume for Presto data
       - ./sql:/opt/presto-server/sql
@@ -25,7 +26,7 @@ services:
       - "8080:8080"
       - "9487:9487"
     mem_limit: 4g
-    memswap_limit: 2g
+    memswap_limit: 20g
     networks:
       - presto-nw
     # extra_hosts:
@@ -40,13 +41,14 @@ services:
       - ./worker1/node.properties:/opt/presto-server/etc/node.properties
       - ./worker1/postgresql.properties:/opt/presto-server/etc/catalog/postgresql.properties
       - ./worker1/spill:/var/lib/presto/spill/
-
+      - ./etc/catalog/ikala.json:/opt/presto-server/etc/catalog/ikala.json
+      - ./worker1/bigquery.properties:/opt/presto-server/etc/catalog/bigquery.properties
     depends_on:
       - coordinator
     ports:
       - "8081:8081"
     mem_limit: 4g
-    memswap_limit: 2g
+    memswap_limit: 20g
     networks:
       - presto-nw
   worker2:
@@ -59,12 +61,14 @@ services:
       - ./worker2/postgresql.properties:/opt/presto-server/etc/catalog/postgresql.properties
       - ./worker2/elasticsearch.properties:/opt/presto-server/etc/catalog/elasticsearch.properties
       - ./worker2/spill:/var/lib/presto/spill/
+      - ./etc/catalog/ikala.json:/opt/presto-server/etc/catalog/ikala.json
+      - ./worker1/bigquery.properties:/opt/presto-server/etc/catalog/bigquery.properties
     depends_on:
       - coordinator
     ports:
       - "8082:8082"
     mem_limit: 4g
-    memswap_limit: 2g
+    memswap_limit: 20g 
     networks:
       - presto-nw
   # postgresql:
