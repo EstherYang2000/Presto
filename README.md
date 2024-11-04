@@ -27,6 +27,7 @@ Presto configuration files are provided for the coordinator and worker nodes. Yo
 
 ### Coordinator Configuration
 
+
 ├── coordinator
 │   ├── config.properties
 │   ├── jvm.config
