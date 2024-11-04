@@ -52,8 +52,8 @@ Presto configuration files are provided for the coordinator and worker nodes. Yo
 │   └── bigquery.properties
 ├── worker2
 │   ├── catalog
-│   ├── catalog
-│   │   ├── credential.json
+│   │   └── credential.json
+
 
 ***
 Ensure to revise the each catalog properties configuration file for each node according to your PostgreSQL,Elasticsearch, BigQuery setup.
